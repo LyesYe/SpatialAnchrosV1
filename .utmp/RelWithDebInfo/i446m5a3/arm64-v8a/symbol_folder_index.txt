@@ -1,0 +1,1 @@
+C:\Code\Unity\VrTest\SpatialAnchrosV1\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\i446m5a3\obj\arm64-v8a

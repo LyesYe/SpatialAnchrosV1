@@ -1,0 +1,5 @@
+C:/Code/Unity/VrTest/SpatialAnchrosV1/.utmp/RelWithDebInfo/i446m5a3/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Code/Unity/VrTest/SpatialAnchrosV1/.utmp/RelWithDebInfo/i446m5a3/arm64-v8a/CMakeFiles/rebuild_cache.dir
+C:/Code/Unity/VrTest/SpatialAnchrosV1/.utmp/RelWithDebInfo/i446m5a3/arm64-v8a/GameActivity/CMakeFiles/game.dir
+C:/Code/Unity/VrTest/SpatialAnchrosV1/.utmp/RelWithDebInfo/i446m5a3/arm64-v8a/GameActivity/CMakeFiles/edit_cache.dir
+C:/Code/Unity/VrTest/SpatialAnchrosV1/.utmp/RelWithDebInfo/i446m5a3/arm64-v8a/GameActivity/CMakeFiles/rebuild_cache.dir

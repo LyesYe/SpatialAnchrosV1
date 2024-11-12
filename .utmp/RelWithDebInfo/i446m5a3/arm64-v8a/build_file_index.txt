@@ -1,0 +1,2 @@
+C:\Code\Unity\VrTest\SpatialAnchrosV1\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\CMakeLists.txt
+C:\Code\Unity\VrTest\SpatialAnchrosV1\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt
