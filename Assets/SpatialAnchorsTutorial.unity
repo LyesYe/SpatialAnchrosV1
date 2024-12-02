@@ -367,6 +367,7 @@ MonoBehaviour:
   _nonSaveableAnchorPrefab: {fileID: 4023169275502983127, guid: ba2d6d17ae59cc54fb60c5d5ef67a6d6, type: 3}
   _nonSaveablePreview: {fileID: 5172613862366085677, guid: ea60157cf88d2924bb58b4ed462e769f, type: 3}
   _nonSaveableTransform: {fileID: 658741663}
+  _textPrefab: {fileID: 7855039611408309087, guid: 892d53e2b6fd381459aa510add2c8b43, type: 3}
 --- !u!1001 &658741661
 PrefabInstance:
   m_ObjectHideFlags: 0

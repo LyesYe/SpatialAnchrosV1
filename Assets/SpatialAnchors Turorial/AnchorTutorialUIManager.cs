@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class AnchorTutorialUIManager : MonoBehaviour
@@ -26,6 +27,16 @@ public class AnchorTutorialUIManager : MonoBehaviour
 
 	[SerializeField]
 	private Transform _nonSaveableTransform;
+
+	[SerializeField]
+	private GameObject _textPrefab; // Prefab pour afficher l'UUID
+
+
+	private Dictionary<Guid, string> _capsuleNames = new();  // Maps UUID to Capsule N name
+	private int _capsuleCount = 0; // Increment to create unique names
+
+
+
 
 	private List<OVRSpatialAnchor> _anchorInstances = new(); // Active instances (red and green)
 
@@ -93,21 +104,27 @@ public class AnchorTutorialUIManager : MonoBehaviour
 	// Also, only save if specified
 	private async void SetupAnchorAsync(OVRSpatialAnchor anchor, bool saveAnchor)
 	{
-		// Keep checking for a valid and localized anchor state
+		// Wait until the anchor is localized
 		if (!await anchor.WhenLocalizedAsync())
 		{
-			Debug.LogError($"Unable to create anchor.");
+			Debug.LogError("Unable to localize anchor.");
 			Destroy(anchor.gameObject);
 			return;
 		}
 
-		// Add the anchor to the list of all instances
+		// Add the anchor to the active list of anchors
 		_anchorInstances.Add(anchor);
 
-		// You save the savable (green) anchors only
+		// Associate this anchor with a unique "Capsule N" name
+		_capsuleCount++;
+		_capsuleNames[anchor.Uuid] = $"Capsule {_capsuleCount}";
+
+		// Display the capsule name above the anchor
+		DisplayAnchorName(anchor);
+
+		// If the anchor is saveable, save it
 		if (saveAnchor && (await anchor.SaveAnchorAsync()).Success)
 		{
-			// Remember UUID so you can load the anchor later
 			_anchorUuids.Add(anchor.Uuid);
 		}
 	}
@@ -140,8 +157,11 @@ public class AnchorTutorialUIManager : MonoBehaviour
 
 		unboundAnchor.BindTo(anchor);
 
-		// Add the anchor to the running total
+		// Add the anchor to the active list
 		_anchorInstances.Add(anchor);
+
+		// Ensure the name is displayed based on the UUID
+		DisplayAnchorName(anchor);
 	}
 
 	/******************* Erase Anchor Methods *****************/
@@ -162,4 +182,37 @@ public class AnchorTutorialUIManager : MonoBehaviour
 			Debug.LogError($"Anchors NOT erased {result.Status}");
 		}
 	}
+
+
+	private void DisplayAnchorName(OVRSpatialAnchor anchor)
+	{
+		// Create a new TextMeshPro object above the anchor, but offset it in the Y direction (top of the capsule)
+		var textObject = Instantiate(_textPrefab, anchor.transform.position + Vector3.up * 0.2f, Quaternion.identity);
+
+		// Set the text object as a child of the anchor, ensuring it follows its rotation
+		textObject.transform.SetParent(anchor.transform);
+
+		// Ensure the text is properly aligned and doesn't get offset due to anchor's local rotation
+		textObject.transform.localPosition = new Vector3(0f, 0.2f, 0f);  // Correct position relative to the capsule
+
+		// Correct the rotation so the text always faces the camera (optional)
+		textObject.transform.rotation = Quaternion.identity; // This keeps the text upright
+
+		// Get the associated name from the dictionary
+		var capsuleName = _capsuleNames.ContainsKey(anchor.Uuid) ? _capsuleNames[anchor.Uuid] : "Unknown Capsule";
+
+		// Get the TextMeshPro component and update its text
+		var textMeshPro = textObject.GetComponent<TextMeshPro>();
+		if (textMeshPro != null)
+		{
+			textMeshPro.text = capsuleName;
+			Debug.Log($"Displaying: {capsuleName}");
+		}
+		else
+		{
+			Debug.LogWarning("TextMeshPro component is missing on the text prefab.");
+		}
+	}
+
+
 }
