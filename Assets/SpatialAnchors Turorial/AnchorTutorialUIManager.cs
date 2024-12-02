@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class AnchorTutorialUIManager : MonoBehaviour
 {
@@ -98,6 +99,10 @@ public class AnchorTutorialUIManager : MonoBehaviour
 		{
 			EraseAllAnchors();
 		}
+		else if (OVRInput.GetDown(OVRInput.Button.Two))
+		{
+                SceneManager.LoadScene("Scene2");
+        }
 	}
 
 	// You need to make sure the anchor is ready to use before you save it.
