@@ -41,7 +41,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
 
 	private List<OVRSpatialAnchor> _anchorInstances = new(); // Active instances (red and green)
 
-	private HashSet<Guid> _anchorUuids = new(); // Simulated external location, like PlayerPrefs
+	public HashSet<Guid> _anchorUuids = new(); // Simulated external location, like PlayerPrefs
 
 	private Action<bool, OVRSpatialAnchor.UnboundAnchor> _onLocalized;
 
@@ -56,6 +56,10 @@ public class AnchorTutorialUIManager : MonoBehaviour
 		{
 			Destroy(this);
 		}
+	}
+	private void Start()
+	{
+		SaveAnchorsWhenQuit.Instance.LoadAnchorsFromPlayerPrefs();
 	}
 
 	// This script responds to five button events:
@@ -103,6 +107,14 @@ public class AnchorTutorialUIManager : MonoBehaviour
 		{
                 SceneManager.LoadScene("Scene2");
         }
+		if(_anchorUuids.Count > 0)
+		{
+			Debug.Log("Anchor UUIDs: ");
+			foreach (var uuid in _anchorUuids)
+			{
+				Debug.Log(uuid.ToString());
+			}
+		}
 	}
 
 	// You need to make sure the anchor is ready to use before you save it.
@@ -218,6 +230,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
 			Debug.LogWarning("TextMeshPro component is missing on the text prefab.");
 		}
 	}
+
 
 
 }
