@@ -11,7 +11,10 @@ public class AnchorTutorialUIManager : MonoBehaviour
 	/// </summary>
 	public static AnchorTutorialUIManager Instance;
 
-	[SerializeField]
+    [SerializeField]
+    private Transform _headTransform; // Reference to the VR user's head transform (center eye)
+
+    [SerializeField]
 	private GameObject _saveableAnchorPrefab;
 
 	[SerializeField]
@@ -32,14 +35,26 @@ public class AnchorTutorialUIManager : MonoBehaviour
 	[SerializeField]
 	private GameObject _textPrefab; // Prefab pour afficher l'UUID
 
+    [SerializeField] 
+	private Material _closestCapsuleMaterial;
 
-	private Dictionary<Guid, string> _capsuleNames = new();  // Maps UUID to Capsule N name
+    // Reference to the default materials for saved and non-saved capsules
+    [SerializeField] private Material _savedCapsuleMaterial;
+    [SerializeField] private Material _nonSavedCapsuleMaterial;
+    // Keep track of the previous closest anchor to restore its material
+    private OVRSpatialAnchor _previousClosestAnchor = null;
+
+
+    private Dictionary<Guid, string> _capsuleNames = new();  // Maps UUID to Capsule N name
 	private int _capsuleCount = 0; // Increment to create unique names
+    private int _fartherCapsulesCount = 0; // Count of capsules farther than 3 meters
+    private OVRSpatialAnchor _farthestCapsule = null; // The farthest anchor (capsule)
+    private float _maxDistance = 0f; // The distance of the farthest anchor
 
 
 
 
-	private List<OVRSpatialAnchor> _anchorInstances = new(); // Active instances (red and green)
+    private List<OVRSpatialAnchor> _anchorInstances = new(); // Active instances (red and green)
 
 	public HashSet<Guid> _anchorUuids = new(); // Simulated external location, like PlayerPrefs
 
@@ -72,7 +87,10 @@ public class AnchorTutorialUIManager : MonoBehaviour
 	// others: no action
 	void Update()
 	{
-		if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger)) // Create a green capsule
+		CheckFartherAnchors();
+		UpdateClosestAnchorMaterial();
+
+        if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger)) // Create a green capsule
 		{
 			// Create a green (savable) spatial anchor
 			var go = Instantiate(_saveableAnchorPrefab, _saveableTransform.position, _saveableTransform.rotation); // Anchor A
@@ -230,6 +248,87 @@ public class AnchorTutorialUIManager : MonoBehaviour
 			Debug.LogWarning("TextMeshPro component is missing on the text prefab.");
 		}
 	}
+    // This method checks for anchors farther than 3 meters from the VR user's head position
+    private void CheckFartherAnchors()
+    {
+        if (_headTransform == null) return;
+
+        _fartherCapsulesCount = 0; // Reset the count each time this is called
+        _farthestCapsule = null; // Reset the farthest capsule
+        _maxDistance = 0f; // Reset the max distance
+
+        foreach (var anchor in _anchorInstances)
+        {
+            // Calculate the distance between the VR user's head position and the anchor's position
+            float distance = Vector3.Distance(_headTransform.position, anchor.transform.position);
+
+            if (distance > 3f)
+            {
+                _fartherCapsulesCount++; // Increment the count of farther capsules
+
+                // Check if this is the farthest capsule found so far
+                if (distance > _maxDistance)
+                {
+                    _maxDistance = distance; // Update the max distance
+                    _farthestCapsule = anchor; // Set this anchor as the farthest one
+                }
+            }
+        }
+    }
+
+    // This method changes the material of the closest anchor and restores the previous one
+    private void UpdateClosestAnchorMaterial()
+    {
+        // Ensure there's a head transform to calculate the distance
+        if (_headTransform == null || _anchorInstances.Count == 0) return;
+
+        // Find the closest anchor by comparing distances
+        OVRSpatialAnchor closestAnchor = null;
+        float minDistance = float.MaxValue; // Start with a very large number
+
+        foreach (var anchor in _anchorInstances)
+        {
+            float distance = Vector3.Distance(_headTransform.position, anchor.transform.position);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closestAnchor = anchor;
+            }
+        }
+
+        // Check if the closest anchor is valid
+        if (closestAnchor != null)
+        {
+            // Change the material of the closest anchor to the highlight material
+            Renderer closestRenderer = closestAnchor.GetComponent<Renderer>();
+            if (closestRenderer != null && _closestCapsuleMaterial != null)
+            {
+                closestRenderer.material = _closestCapsuleMaterial;
+            }
+        }
+
+        // If there was a previous closest anchor, restore its material based on whether it's saved or not
+        if (_previousClosestAnchor != null && _previousClosestAnchor != closestAnchor)
+        {
+            Renderer previousRenderer = _previousClosestAnchor.GetComponent<Renderer>();
+            if (previousRenderer != null)
+            {
+                // Check if the previous anchor is saved by checking if its UUID is in the _anchorUuids HashSet
+                if (_anchorUuids.Contains(_previousClosestAnchor.Uuid))
+                {
+                    previousRenderer.material = _savedCapsuleMaterial;
+                }
+                else
+                {
+                    previousRenderer.material = _nonSavedCapsuleMaterial;
+                }
+            }
+        }
+
+        // Update the reference to the previous closest anchor
+        _previousClosestAnchor = closestAnchor;
+    }
+
 
 
 
