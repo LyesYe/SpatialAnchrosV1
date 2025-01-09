@@ -54,6 +54,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
     private OVRSpatialAnchor _farthestCapsule = null; // The farthest anchor (capsule)
     private OVRSpatialAnchor _closestAnchor = null; // The closest anchor (capsule)
     private float _maxDistance = 0f; // The distance of the farthest anchor
+    private int _localizedAnchorCount = 0; // Track how many anchors have been localized
 
 
 
@@ -202,12 +203,31 @@ public class AnchorTutorialUIManager : MonoBehaviour
 		// Ensure the name is displayed based on the UUID
 		DisplayAnchorName(anchor);
 		ProcessAnchorOnLoad(anchor);
+		OnAnchorLocalized();
     }
 
-	/******************* Erase Anchor Methods *****************/
-	// If the Y button is pressed, erase all anchors saved
-	// in the headset, but don't destroy them. They should remain displayed.
-	public async void EraseAllAnchors()
+    // Called for each anchor when it is localized
+    private void OnAnchorLocalized()
+    {
+        _localizedAnchorCount++;
+    // If all anchors have been localized, execute the desired action
+        if (_localizedAnchorCount == _anchorInstances.Count)
+        {
+            OnAllAnchorsLocalized();
+        }
+    }
+
+    // Called after all anchors have been localized
+    private void OnAllAnchorsLocalized()
+    {
+        // Perform actions on the closest anchor
+        Instantiate(_closestRingPrefab, _closestAnchor.GetComponent<Transform>().GetChild(1));
+    }
+
+    /******************* Erase Anchor Methods *****************/
+    // If the Y button is pressed, erase all anchors saved
+    // in the headset, but don't destroy them. They should remain displayed.
+    public async void EraseAllAnchors()
 	{
 		var result = await OVRSpatialAnchor.EraseAnchorsAsync(anchors: null, uuids: _anchorUuids);
 		if (result.Success)
@@ -352,10 +372,6 @@ public class AnchorTutorialUIManager : MonoBehaviour
         if (_closestAnchor == null || distance < Vector3.Distance(_headTransform.position, _closestAnchor.transform.position))
         {
             _closestAnchor = anchor;
-
-            // Perform actions on the closest anchor
-            Instantiate(_closestRingPrefab, _closestAnchor.GetComponent<Transform>());
-            Debug.Log("ON LOAD: CLOSEST ANCHOR Found");
         }
     }
 
