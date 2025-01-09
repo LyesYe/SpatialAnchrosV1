@@ -17,8 +17,10 @@ public class Scene2Manager : MonoBehaviour
     }
     void Start()
     {
-        AnchorTutorialUIManager.Instance.LoadAllAnchors();
-    }
+        AnchorTutorialUIManager.Instance._anchorInstances = new();
+		AnchorTutorialUIManager.Instance.LoadAllAnchors();
+
+	}
 
 
 }

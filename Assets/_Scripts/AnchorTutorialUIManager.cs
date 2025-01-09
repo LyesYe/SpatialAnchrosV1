@@ -59,7 +59,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
 
 
 
-    private List<OVRSpatialAnchor> _anchorInstances = new(); // Active instances (red and green)
+    public List<OVRSpatialAnchor> _anchorInstances = new(); // Active instances (red and green)
 
 	public HashSet<Guid> _anchorUuids = new(); // Simulated external location, like PlayerPrefs
 
@@ -173,6 +173,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
 	public async void LoadAllAnchors()
 	{
 		_closestAnchor = null;
+		_localizedAnchorCount = 0;
 		// Load and localize
 		var unboundAnchors = new List<OVRSpatialAnchor.UnboundAnchor>();
 		var result = await OVRSpatialAnchor.LoadUnboundAnchorsAsync(_anchorUuids, unboundAnchors);
