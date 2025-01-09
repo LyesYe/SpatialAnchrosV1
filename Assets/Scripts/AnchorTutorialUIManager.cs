@@ -295,6 +295,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
                 closestAnchor = anchor;
             }
         }
+		Debug.Log(closestAnchor);
 
         // Check if the closest anchor is valid
         if (closestAnchor != null)
@@ -303,6 +304,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
             Renderer closestRenderer = closestAnchor.transform.GetChild(0).GetComponent<Renderer>();
             if (closestRenderer != null && _closestCapsuleMaterial != null)
             {
+				Debug.Log("render is not null");
                 closestRenderer.material = _closestCapsuleMaterial;
             }
         }
