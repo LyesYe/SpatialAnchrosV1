@@ -300,7 +300,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
         if (closestAnchor != null)
         {
             // Change the material of the closest anchor to the highlight material
-            Renderer closestRenderer = closestAnchor.GetComponent<Renderer>();
+            Renderer closestRenderer = closestAnchor.transform.GetChild(0).GetComponent<Renderer>();
             if (closestRenderer != null && _closestCapsuleMaterial != null)
             {
                 closestRenderer.material = _closestCapsuleMaterial;
@@ -310,7 +310,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
         // If there was a previous closest anchor, restore its material based on whether it's saved or not
         if (_previousClosestAnchor != null && _previousClosestAnchor != closestAnchor)
         {
-            Renderer previousRenderer = _previousClosestAnchor.GetComponent<Renderer>();
+            Renderer previousRenderer = _previousClosestAnchor.transform.GetChild(0).GetComponent<Renderer>();
             if (previousRenderer != null)
             {
                 // Check if the previous anchor is saved by checking if its UUID is in the _anchorUuids HashSet
