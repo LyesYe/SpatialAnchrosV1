@@ -172,6 +172,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
 	/******************* Load Anchor Methods **********************/
 	public async void LoadAllAnchors()
 	{
+		_closestAnchor = null;
 		// Load and localize
 		var unboundAnchors = new List<OVRSpatialAnchor.UnboundAnchor>();
 		var result = await OVRSpatialAnchor.LoadUnboundAnchorsAsync(_anchorUuids, unboundAnchors);
@@ -221,7 +222,8 @@ public class AnchorTutorialUIManager : MonoBehaviour
     private void OnAllAnchorsLocalized()
     {
         // Perform actions on the closest anchor
-        Instantiate(_closestRingPrefab, _closestAnchor.GetComponent<Transform>().GetChild(1));
+        var go  = Instantiate(_closestRingPrefab, _closestAnchor.GetComponent<Transform>().GetChild(1));
+		go.transform.localRotation = Quaternion.identity;
     }
 
     /******************* Erase Anchor Methods *****************/
