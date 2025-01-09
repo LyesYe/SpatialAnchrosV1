@@ -281,7 +281,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
     {
         // Ensure there's a head transform to calculate the distance
         if (_headTransform == null || _anchorInstances.Count == 0) return;
-
+		Debug.Log("LOOKING FOR THE CLOSEST ANCHOR");
         // Find the closest anchor by comparing distances
         OVRSpatialAnchor closestAnchor = null;
         float minDistance = float.MaxValue; // Start with a very large number
@@ -302,12 +302,17 @@ public class AnchorTutorialUIManager : MonoBehaviour
         {
             // Change the material of the closest anchor to the highlight material
             Renderer closestRenderer = closestAnchor.transform.GetChild(0).GetComponent<Renderer>();
+			
             if (closestRenderer != null && _closestCapsuleMaterial != null)
             {
 				Debug.Log("render is not null");
                 closestRenderer.material = _closestCapsuleMaterial;
             }
         }
+		else
+		{
+			Debug.Log("CLOSEST ANCHOR NOT BEING CALCULATED");
+		}
 
         // If there was a previous closest anchor, restore its material based on whether it's saved or not
         if (_previousClosestAnchor != null && _previousClosestAnchor != closestAnchor)
