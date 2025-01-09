@@ -52,6 +52,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
 	private int _capsuleCount = 0; // Increment to create unique names
     private int _fartherCapsulesCount = 0; // Count of capsules farther than 3 meters
     private OVRSpatialAnchor _farthestCapsule = null; // The farthest anchor (capsule)
+    private OVRSpatialAnchor _closestAnchor = null; // The closest anchor (capsule)
     private float _maxDistance = 0f; // The distance of the farthest anchor
 
 
@@ -200,7 +201,8 @@ public class AnchorTutorialUIManager : MonoBehaviour
 
 		// Ensure the name is displayed based on the UUID
 		DisplayAnchorName(anchor);
-	}
+		ProcessAnchorOnLoad(anchor);
+    }
 
 	/******************* Erase Anchor Methods *****************/
 	// If the Y button is pressed, erase all anchors saved
@@ -338,37 +340,25 @@ public class AnchorTutorialUIManager : MonoBehaviour
         // Update the reference to the previous closest anchor
         _previousClosestAnchor = closestAnchor;
     }
-    private void ProcessClosestAnchorOnLoad()
+    private void ProcessAnchorOnLoad(OVRSpatialAnchor anchor)
     {
         // Ensure that the head transform and anchor instances exist
-        if (_headTransform == null || _anchorInstances.Count == 0) return;
+        if (_headTransform == null || anchor == null) return;
 
-        // Variables to track the closest anchor and the minimum distance
-        OVRSpatialAnchor closestAnchor = null;
-        float minDistance = float.MaxValue;
+        // Calculate the distance from the head transform to the given anchor
+        float distance = Vector3.Distance(_headTransform.position, anchor.transform.position);
 
-        // Iterate through all anchor instances to find the closest one
-        foreach (var anchor in _anchorInstances)
+        // If this anchor is closer than the previously found closest anchor, update the closest anchor
+        if (_closestAnchor == null || distance < Vector3.Distance(_headTransform.position, _closestAnchor.transform.position))
         {
-            // Calculate the distance from the head transform to the current anchor
-            float distance = Vector3.Distance(_headTransform.position, anchor.transform.position);
+            _closestAnchor = anchor;
 
-            // If this anchor is closer than the previously found one, update the closest anchor
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                closestAnchor = anchor;
-            }
-        }
-
-        // Perform actions on the closest anchor if found
-        if (closestAnchor != null)
-        {
-			Instantiate(_closestRingPrefab, closestAnchor.GetComponent<Transform>());
-
-
+            // Perform actions on the closest anchor
+            Instantiate(_closestRingPrefab, _closestAnchor.GetComponent<Transform>());
+            Debug.Log("ON LOAD: CLOSEST ANCHOR Found");
         }
     }
+
 
 
 
