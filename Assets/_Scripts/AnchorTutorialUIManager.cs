@@ -35,6 +35,9 @@ public class AnchorTutorialUIManager : MonoBehaviour
 	[SerializeField]
 	private GameObject _textPrefab; // Prefab pour afficher l'UUID
 
+	[SerializeField]
+	private GameObject _closestRingPrefab;
+
     [SerializeField] 
 	private Material _closestCapsuleMaterial;
 
@@ -335,6 +338,38 @@ public class AnchorTutorialUIManager : MonoBehaviour
         // Update the reference to the previous closest anchor
         _previousClosestAnchor = closestAnchor;
     }
+    private void ProcessClosestAnchorOnLoad()
+    {
+        // Ensure that the head transform and anchor instances exist
+        if (_headTransform == null || _anchorInstances.Count == 0) return;
+
+        // Variables to track the closest anchor and the minimum distance
+        OVRSpatialAnchor closestAnchor = null;
+        float minDistance = float.MaxValue;
+
+        // Iterate through all anchor instances to find the closest one
+        foreach (var anchor in _anchorInstances)
+        {
+            // Calculate the distance from the head transform to the current anchor
+            float distance = Vector3.Distance(_headTransform.position, anchor.transform.position);
+
+            // If this anchor is closer than the previously found one, update the closest anchor
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closestAnchor = anchor;
+            }
+        }
+
+        // Perform actions on the closest anchor if found
+        if (closestAnchor != null)
+        {
+			Instantiate(_closestRingPrefab, closestAnchor.GetComponent<Transform>());
+
+
+        }
+    }
+
 
 
 

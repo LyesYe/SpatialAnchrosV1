@@ -493,6 +493,7 @@ MonoBehaviour:
   _nonSaveablePreview: {fileID: 5172613862366085677, guid: ea60157cf88d2924bb58b4ed462e769f, type: 3}
   _nonSaveableTransform: {fileID: 658741663}
   _textPrefab: {fileID: 7855039611408309087, guid: 892d53e2b6fd381459aa510add2c8b43, type: 3}
+  _closestRingPrefab: {fileID: 8323984741948188392, guid: 02faaf3daa5c5bc4db988f2a6b2d4489, type: 3}
   _closestCapsuleMaterial: {fileID: 2100000, guid: 34a07703f61ffcb4fb7fa009b5389825, type: 2}
   _savedCapsuleMaterial: {fileID: 2100000, guid: 7a1b0d67dd748124487cd4fa2cdae949, type: 2}
   _nonSavedCapsuleMaterial: {fileID: 2100000, guid: d7c56c28bba9bf4479109de0e318b8db, type: 2}
