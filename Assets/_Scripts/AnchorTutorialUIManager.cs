@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -41,8 +42,26 @@ public class AnchorTutorialUIManager : MonoBehaviour
     [SerializeField] 
 	private Material _closestCapsuleMaterial;
 
-    // Reference to the default materials for saved and non-saved capsules
-    [SerializeField] private Material _savedCapsuleMaterial;
+	[SerializeField]
+	private TextMeshProUGUI _redCapsuleCountText; // UI text for red capsules
+	[SerializeField]
+	private TextMeshProUGUI _greenCapsuleCountText; // UI text for green capsules
+
+
+	[SerializeField]
+	private UnityEngine.UI.Toggle loadAnchorsButton; // Button to load all anchors
+
+	[SerializeField]
+	private UnityEngine.UI.Toggle destroyAnchorsButton; // Button to destroy all runtime anchors
+
+	[SerializeField]
+	private UnityEngine.UI.Toggle eraseAnchorsButton; // Button to erase all saved anchors
+
+	public int _redCapsuleCount = 0; // Track the number of red capsules
+	public int _greenCapsuleCount = 0; // Track the number of green capsules
+
+	// Reference to the default materials for saved and non-saved capsules
+	[SerializeField] private Material _savedCapsuleMaterial;
     [SerializeField] private Material _nonSavedCapsuleMaterial;
     // Keep track of the previous closest anchor to restore its material
     private OVRSpatialAnchor _previousClosestAnchor = null;
@@ -76,10 +95,26 @@ public class AnchorTutorialUIManager : MonoBehaviour
 		{
 			Destroy(this);
 		}
+
+
+		if (loadAnchorsButton != null)
+		{
+			loadAnchorsButton.onValueChanged.AddListener(OnLoadAnchorsButtonPressed);
+		}
+		if (destroyAnchorsButton != null)
+		{
+			destroyAnchorsButton.onValueChanged.AddListener(OnDestroyAnchorsButtonPressed);
+		}
+		if (eraseAnchorsButton != null)
+		{
+			eraseAnchorsButton.onValueChanged.AddListener(OnEraseAnchorsButtonPressed);
+		}
 	}
 	private void Start()
 	{
 		SaveAnchorsWhenQuit.Instance.LoadAnchorsFromPlayerPrefs();
+
+		
 	}
 
 	// This script responds to five button events:
@@ -95,37 +130,43 @@ public class AnchorTutorialUIManager : MonoBehaviour
 		CheckFartherAnchors();
 		UpdateClosestAnchorMaterial();
 
-        if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger)) // Create a green capsule
+        if (OVRInput.GetDown(OVRInput.Button.Three)) // Create a green capsule USING BUTTON a
 		{
 			// Create a green (savable) spatial anchor
 			var go = Instantiate(_saveableAnchorPrefab, _saveableTransform.position, _saveableTransform.rotation); // Anchor A
 			SetupAnchorAsync(go.AddComponent<OVRSpatialAnchor>(), saveAnchor: true);
 		}
-		else if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger)) // Create a red capsule
+		else if (OVRInput.GetDown(OVRInput.Button.One)) // Create a red capsule USING BUTTON x
 		{
 			// Create a red (non-savable) spatial anchor.
 			var go = Instantiate(_nonSaveableAnchorPrefab, _nonSaveableTransform.position, _nonSaveableTransform.rotation); // Anchor b
 			SetupAnchorAsync(go.AddComponent<OVRSpatialAnchor>(), saveAnchor: false);
 		}
-		else if (OVRInput.GetDown(OVRInput.Button.One)) // a button
-		{
-			LoadAllAnchors();
-		}
-		else if (OVRInput.GetDown(OVRInput.Button.Three)) // x button
-		{
-			// Destroy all anchors from the scene, but don't erase them from storage
-			foreach (var anchor in _anchorInstances)
-			{
-				Destroy(anchor.gameObject);
-			}
+		//else if (OVRInput.GetDown(OVRInput.Button.One)) // a button
+		//{
+		//	LoadAllAnchors();
+		//}
+		//else if (OVRInput.GetDown(OVRInput.Button.Three)) // x button
+		//{
+		//	// Destroy all anchors from the scene, but don't erase them from storage
+		//	foreach (var anchor in _anchorInstances)
+		//	{
+		//		Destroy(anchor.gameObject);
+		//	}
 
-			// Clear the list of running anchors
-			_anchorInstances.Clear();
-		}
-		else if (OVRInput.GetDown(OVRInput.Button.Four)) // y button
-		{
-			EraseAllAnchors();
-		}
+		//	_greenCapsuleCount = 0; // Reset the green capsule count
+
+		//	_redCapsuleCount = 0; // Reset the red capsule count
+
+		//	UpdateCapsuleCountUI();
+
+		//	// Clear the list of running anchors
+		//	_anchorInstances.Clear();
+		//}
+		//else if (OVRInput.GetDown(OVRInput.Button.Four)) // y button
+		//{
+		//	EraseAllAnchors();
+		//}
 		else if (OVRInput.GetDown(OVRInput.Button.Two))
 		{
                 SceneManager.LoadScene("Scene 2");
@@ -137,6 +178,71 @@ public class AnchorTutorialUIManager : MonoBehaviour
 			{
 				Debug.Log(uuid.ToString());
 			}
+		}
+	}
+
+
+
+	public void OnLoadAnchorsButtonPressed(bool isPressed)
+	{
+		if (isPressed)
+		{
+			LoadAllAnchors();
+
+			// Reset the button state (optional)
+			loadAnchorsButton.isOn = false;
+		}
+	}
+
+	public void OnDestroyAnchorsButtonPressed(bool isPressed)
+	{
+		if (isPressed)
+		{
+			// Destroy all anchors from the scene
+			for (int i = _anchorInstances.Count - 1; i >= 0; i--)
+			{
+				if (_anchorInstances[i] != null)
+				{
+					Destroy(_anchorInstances[i].gameObject); // Destroy the GameObject
+				}
+			}
+
+			// Clear the list of active anchors
+			_anchorInstances.Clear();
+
+			// Reset the capsule counts
+			_greenCapsuleCount = 0;
+			_redCapsuleCount = 0;
+			UpdateCapsuleCountUI();
+
+			// Reset the button state (optional)
+			destroyAnchorsButton.isOn = false;
+
+			Debug.Log("All anchor instances destroyed from the scene.");
+		}
+	}
+
+	public void OnEraseAnchorsButtonPressed(bool isPressed)
+	{
+		if (isPressed)
+		{
+			EraseAllAnchors();
+
+			// Reset the button state (optional)
+			eraseAnchorsButton.isOn = false;
+		}
+	}
+
+
+	private void UpdateCapsuleCountUI()
+	{
+		if (_redCapsuleCountText != null)
+		{
+			_redCapsuleCountText.text = $"{_redCapsuleCount}";
+		}
+		if (_greenCapsuleCountText != null)
+		{
+			_greenCapsuleCountText.text = $"{_greenCapsuleCount}";
 		}
 	}
 
@@ -166,13 +272,32 @@ public class AnchorTutorialUIManager : MonoBehaviour
 		if (saveAnchor && (await anchor.SaveAnchorAsync()).Success)
 		{
 			_anchorUuids.Add(anchor.Uuid);
+			_greenCapsuleCount++; // Increment green capsule count
+			UpdateCapsuleCountUI(); // Update the UI
+		}
+		else
+		{
+			_redCapsuleCount++; // Increment red capsule count
+			UpdateCapsuleCountUI(); // Update the UI
 		}
 	}
 
 	/******************* Load Anchor Methods **********************/
 	public async void LoadAllAnchors()
 	{
-		_closestAnchor = null;
+		// Destroy all existing anchors before loading new ones
+		for (int i = _anchorInstances.Count - 1; i >= 0; i--)
+		{
+			if (_anchorInstances[i] != null)
+			{
+				Destroy(_anchorInstances[i].gameObject);
+			}
+		}
+		_anchorInstances.Clear();
+
+		// Reset the localized anchor count
+		_localizedAnchorCount = 0;
+
 		// Load and localize
 		var unboundAnchors = new List<OVRSpatialAnchor.UnboundAnchor>();
 		var result = await OVRSpatialAnchor.LoadUnboundAnchorsAsync(_anchorUuids, unboundAnchors);
@@ -192,6 +317,19 @@ public class AnchorTutorialUIManager : MonoBehaviour
 
 	private void OnLocalized(bool success, OVRSpatialAnchor.UnboundAnchor unboundAnchor)
 	{
+		if (!success)
+		{
+			Debug.LogError("Failed to localize anchor.");
+			return;
+		}
+
+		// Check if an anchor with the same UUID already exists
+		if (_anchorInstances.Any(anchor => anchor.Uuid == unboundAnchor.Uuid))
+		{
+			Debug.LogWarning($"Anchor with UUID {unboundAnchor.Uuid} is already bound. Skipping binding.");
+			return;
+		}
+
 		var pose = unboundAnchor.Pose;
 		var go = Instantiate(_saveableAnchorPrefab, pose.position, pose.rotation);
 		var anchor = go.AddComponent<OVRSpatialAnchor>();
@@ -203,12 +341,23 @@ public class AnchorTutorialUIManager : MonoBehaviour
 
 		// Ensure the name is displayed based on the UUID
 		DisplayAnchorName(anchor);
-		ProcessAnchorOnLoad(anchor);
-		OnAnchorLocalized();
-    }
 
-    // Called for each anchor when it is localized
-    private void OnAnchorLocalized()
+		// Check if the anchor is saved (green capsule)
+		if (_anchorUuids.Contains(anchor.Uuid))
+		{
+			_greenCapsuleCount++; // Increment green capsule count
+			UpdateCapsuleCountUI(); // Update the UI
+		}
+
+		// Process the anchor to update the closest anchor reference
+		ProcessAnchorOnLoad(anchor);
+
+		// Notify that an anchor has been localized
+		OnAnchorLocalized();
+	}
+
+	// Called for each anchor when it is localized
+	private void OnAnchorLocalized()
     {
         _localizedAnchorCount++;
     // If all anchors have been localized, execute the desired action
@@ -218,34 +367,58 @@ public class AnchorTutorialUIManager : MonoBehaviour
         }
     }
 
-    // Called after all anchors have been localized
-    private void OnAllAnchorsLocalized()
-    {
-        // Perform actions on the closest anchor
-        var go  = Instantiate(_closestRingPrefab, _closestAnchor.GetComponent<Transform>().GetChild(1));
-		go.transform.localRotation = Quaternion.identity;
-    }
-
-    /******************* Erase Anchor Methods *****************/
-    // If the Y button is pressed, erase all anchors saved
-    // in the headset, but don't destroy them. They should remain displayed.
-    public async void EraseAllAnchors()
+	// Called after all anchors have been localized
+	private void OnAllAnchorsLocalized()
 	{
-		var result = await OVRSpatialAnchor.EraseAnchorsAsync(anchors: null, uuids: _anchorUuids);
-		if (result.Success)
-		{
-			// Erase our reference lists
-			_anchorUuids.Clear();
+		// Update the material of the closest anchor
+		UpdateClosestAnchorMaterial();
 
-			Debug.Log($"Anchors erased.");
-		}
-		else
+		// Perform additional actions on the closest anchor (e.g., instantiate a ring)
+		if (_closestAnchor != null)
 		{
-			Debug.LogError($"Anchors NOT erased {result.Status}");
+			var go = Instantiate(_closestRingPrefab, _closestAnchor.GetComponent<Transform>().GetChild(1));
+			go.transform.localRotation = Quaternion.identity;
 		}
 	}
 
+	/******************* Erase Anchor Methods *****************/
+	// If the Y button is pressed, erase all anchors saved
+	// in the headset, but don't destroy them. They should remain displayed.
+	public async void EraseAllAnchors()
+	{
+		// Convert the HashSet of UUIDs to a list for easier batching
+		List<Guid> uuidsToErase = _anchorUuids.ToList();
 
+		// Define the maximum number of anchors to erase in one batch
+		const int batchSize = 32;
+
+		// Process the UUIDs in batches
+		for (int i = 0; i < uuidsToErase.Count; i += batchSize)
+		{
+			// Get the current batch of UUIDs
+			var batch = uuidsToErase.Skip(i).Take(batchSize).ToList();
+
+			// Erase the current batch of anchors
+			var result = await OVRSpatialAnchor.EraseAnchorsAsync(anchors: null, uuids: batch);
+			if (!result.Success)
+			{
+				Debug.LogError($"Failed to erase anchors in batch {i / batchSize + 1}: {result.Status}");
+				return; // Stop if any batch fails
+			}
+
+			Debug.Log($"Successfully erased batch {i / batchSize + 1} of anchors.");
+		}
+
+		// Clear the anchor UUIDs list after all batches are processed
+		_anchorUuids.Clear();
+
+
+		// Optionally, clear the saved anchors from PlayerPrefs
+		PlayerPrefs.DeleteKey("SavedAnchors");
+		PlayerPrefs.Save();
+
+		Debug.Log("All anchors erased and removed from memory.");
+	}
 	private void DisplayAnchorName(OVRSpatialAnchor anchor)
 	{
 		// Create a new TextMeshPro object above the anchor, but offset it in the Y direction (top of the capsule)
