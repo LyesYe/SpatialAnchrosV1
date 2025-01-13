@@ -41,13 +41,6 @@ public class AnchorTutorialUIManager : MonoBehaviour
 
     [SerializeField] 
 	private Material _closestCapsuleMaterial;
-
-	[SerializeField]
-	private TextMeshProUGUI _redCapsuleCountText; // UI text for red capsules
-	[SerializeField]
-	private TextMeshProUGUI _greenCapsuleCountText; // UI text for green capsules
-
-
 	[SerializeField]
 	private UnityEngine.UI.Toggle loadAnchorsButton; // Button to load all anchors
 
@@ -69,7 +62,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
 
     private Dictionary<Guid, string> _capsuleNames = new();  // Maps UUID to Capsule N name
 	private int _capsuleCount = 0; // Increment to create unique names
-    private int _fartherCapsulesCount = 0; // Count of capsules farther than 3 meters
+    public  int _fartherCapsulesCount = 0; // Count of capsules farther than 3 meters
     private OVRSpatialAnchor _farthestCapsule = null; // The farthest anchor (capsule)
     private OVRSpatialAnchor _closestAnchor = null; // The closest anchor (capsule)
     private float _maxDistance = 0f; // The distance of the farthest anchor
@@ -127,7 +120,8 @@ public class AnchorTutorialUIManager : MonoBehaviour
 	// others: no action
 	void Update()
 	{
-		CheckFartherAnchors();
+		print(_redCapsuleCount);
+        _fartherCapsulesCount = CheckFartherAnchors();
 		UpdateClosestAnchorMaterial();
 
         if (OVRInput.GetDown(OVRInput.Button.Three)) // Create a green capsule USING BUTTON a
@@ -156,9 +150,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
 
 		//	_greenCapsuleCount = 0; // Reset the green capsule count
 
-		//	_redCapsuleCount = 0; // Reset the red capsule count
-
-		//	UpdateCapsuleCountUI();
+		//	_redCapsuleCount = 0; // Reset the red capsule counts
 
 		//	// Clear the list of running anchors
 		//	_anchorInstances.Clear();
@@ -213,7 +205,6 @@ public class AnchorTutorialUIManager : MonoBehaviour
 			// Reset the capsule counts
 			_greenCapsuleCount = 0;
 			_redCapsuleCount = 0;
-			UpdateCapsuleCountUI();
 
 			// Reset the button state (optional)
 			destroyAnchorsButton.isOn = false;
@@ -234,17 +225,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
 	}
 
 
-	private void UpdateCapsuleCountUI()
-	{
-		if (_redCapsuleCountText != null)
-		{
-			_redCapsuleCountText.text = $"{_redCapsuleCount}";
-		}
-		if (_greenCapsuleCountText != null)
-		{
-			_greenCapsuleCountText.text = $"{_greenCapsuleCount}";
-		}
-	}
+
 
 	// You need to make sure the anchor is ready to use before you save it.
 	// Also, only save if specified
@@ -273,12 +254,13 @@ public class AnchorTutorialUIManager : MonoBehaviour
 		{
 			_anchorUuids.Add(anchor.Uuid);
 			_greenCapsuleCount++; // Increment green capsule count
-			UpdateCapsuleCountUI(); // Update the UI
+			
 		}
 		else
 		{
+			print("ghftyfhfyttftfvtv");
 			_redCapsuleCount++; // Increment red capsule count
-			UpdateCapsuleCountUI(); // Update the UI
+			
 		}
 	}
 
@@ -346,7 +328,6 @@ public class AnchorTutorialUIManager : MonoBehaviour
 		if (_anchorUuids.Contains(anchor.Uuid))
 		{
 			_greenCapsuleCount++; // Increment green capsule count
-			UpdateCapsuleCountUI(); // Update the UI
 		}
 
 		// Process the anchor to update the closest anchor reference
@@ -449,11 +430,11 @@ public class AnchorTutorialUIManager : MonoBehaviour
 		}
 	}
     // This method checks for anchors farther than 3 meters from the VR user's head position
-    private void CheckFartherAnchors()
+    private int CheckFartherAnchors()
     {
-        if (_headTransform == null) return;
+        if (_headTransform == null) return 0;
 
-        _fartherCapsulesCount = 0; // Reset the count each time this is called
+        int counting = 0; // Reset the count each time this is called
         _farthestCapsule = null; // Reset the farthest capsule
         _maxDistance = 0f; // Reset the max distance
 
@@ -464,7 +445,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
 
             if (distance > 3f)
             {
-                _fartherCapsulesCount++; // Increment the count of farther capsules
+                counting++; // Increment the count of farther capsules
 
                 // Check if this is the farthest capsule found so far
                 if (distance > _maxDistance)
@@ -474,6 +455,7 @@ public class AnchorTutorialUIManager : MonoBehaviour
                 }
             }
         }
+		return counting;
     }
 
     // This method changes the material of the closest anchor and restores the previous one
