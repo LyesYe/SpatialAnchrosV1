@@ -33,7 +33,7 @@ public class UIManager : MonoBehaviour
         }        
         if (_farCapsuleCountText != null)
         {
-            _farCapsuleCountText.text = $"Number of Capsules Farther than 3 Meters: {AnchorTutorialUIManager.Instance._fartherCapsulesCount}";
+            _farCapsuleCountText.text = $"{AnchorTutorialUIManager.Instance._fartherCapsulesCount}";
         }
     }
 
