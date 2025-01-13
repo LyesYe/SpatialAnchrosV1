@@ -161,7 +161,14 @@ public class AnchorTutorialUIManager : MonoBehaviour
 		//}
 		else if (OVRInput.GetDown(OVRInput.Button.Two))
 		{
-                SceneManager.LoadScene("Scene 2");
+			if (SceneManager.GetActiveScene().name == "Scene 1")
+			{
+				SceneManager.LoadScene("Scene 2");
+			}
+            else if (SceneManager.GetActiveScene().name == "Scene 2")
+            {
+                SceneManager.LoadScene("Scene 1");
+            }
         }
 		if(_anchorUuids.Count > 0)
 		{
