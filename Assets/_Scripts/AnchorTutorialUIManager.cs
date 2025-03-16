@@ -407,6 +407,8 @@ public class AnchorTutorialUIManager : MonoBehaviour
 
 		Debug.Log("All anchors erased and removed from memory.");
 	}
+	
+	
 	private void DisplayAnchorName(OVRSpatialAnchor anchor)
 	{
 		// Create a new TextMeshPro object above the anchor, but offset it in the Y direction (top of the capsule)
@@ -437,7 +439,8 @@ public class AnchorTutorialUIManager : MonoBehaviour
 		}
 	}
     // This method checks for anchors farther than 3 meters from the VR user's head position
-    private int CheckFartherAnchors()
+    
+	private int CheckFartherAnchors()
     {
         if (_headTransform == null) return 0;
 
@@ -524,7 +527,8 @@ public class AnchorTutorialUIManager : MonoBehaviour
         // Update the reference to the previous closest anchor
         _previousClosestAnchor = closestAnchor;
     }
-    private void ProcessAnchorOnLoad(OVRSpatialAnchor anchor)
+    
+	private void ProcessAnchorOnLoad(OVRSpatialAnchor anchor)
     {
         // Ensure that the head transform and anchor instances exist
         if (_headTransform == null || anchor == null) return;
@@ -538,9 +542,6 @@ public class AnchorTutorialUIManager : MonoBehaviour
             _closestAnchor = anchor;
         }
     }
-
-
-
 
 
 
