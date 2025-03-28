@@ -1,0 +1,4 @@
+repository "SpatialAnchrosV1@samibrahimdj@cloud"
+  path "/"
+    br "/main"
+    co "/main"
